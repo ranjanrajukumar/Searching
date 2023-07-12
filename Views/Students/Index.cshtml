@@ -1,0 +1,98 @@
+﻿@model IEnumerable<Searching.Models.Domain.Student>
+
+@{
+    ViewData["Title"] = "Index";
+}
+@using (Html.BeginForm("Index", "Students", FormMethod.Get))
+{
+    <p>
+        <b>Search Option:</b> @Html.RadioButton("option","Name")<text>Name</text>
+        @Html.RadioButton("option","Gender")<text>Gender</text>
+        @Html.RadioButton("option","Subjects")<text>Subject</text>
+        @Html.TextBox("search", null, new { id = "searchInput" })
+        <input type="submit" value="Search" />
+    </p>
+}
+<h1>Searching Page</h1>
+
+<p>
+    <a asp-action="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.ActionLink("Name", "Index", new { sortOrder = ViewBag.NameSortParam })
+            </th>
+            <th>
+                @Html.ActionLink("Gender", "Index", new { sortOrder = ViewBag.GenderSortParam })
+            </th>
+            <th>
+                @Html.ActionLink("Subjects", "Index", new { sortOrder = ViewBag.SubjectsSortParam })
+            </th>
+            @*            <th>
+            @Html.DisplayNameFor(model => model.Name)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Gender)
+            </th>
+            <th>
+            @Html.DisplayNameFor(model => model.Subjects)
+            </th>*@
+
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model.Count() == 0)
+        {
+            <tr>
+                <td colspan="2">@ViewBag.Message</td>
+            </tr>
+        }
+        else
+        {
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Name)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Gender)
+                    </td>
+                    <td>
+                        @Html.DisplayFor(modelItem => item.Subjects)
+                    </td>
+                    <td>
+                        <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                        <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                        <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            $("#searchInput").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("GetSearchSuggestions", "Students")",
+                        data: { term: request.term },
+                        dataType: "json",
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#searchInput").val(ui.item.value);
+                    $("#searchForm").submit();
+                }
+            });
+        });
+    </script>
+}
